@@ -24,19 +24,6 @@ public class musicApp {
         }
         Generator.generateSong(100);
         System.out.println("finished generating");
-//        notes.add(new int[]{48,10});
-//        notes.add(new int[]{50,5});
-//        notes.add(new int[]{52,10});
-//        notes.add(new int[]{48,5});
-//        notes.add(new int[]{52,10});
-//        notes.add(new int[]{48,10});
-//        notes.add(new int[]{52,5});
-//        chords.add(new String[]{"major", "10"});
-//        chords.add(new String[]{"sus2", "10"});
-//        chords.add(new String[]{"sus4", "10"});
-//        chords.add(new String[]{"major", "10"});
-//        playNotes(notes, 0);
-//        playChords(chords, 0, 48);
     }
 
     /**
@@ -53,29 +40,7 @@ public class musicApp {
         sequencer.setSequence(input);
 //        sequencer.start();
         Markov.analyze(input);
-        Track[] temp = input.getTracks();
         // Start playing
-    }
-
-    /**
-     *
-     * @param notes list of notes to play
-     * @param i
-     */
-    public static void playNotes(ArrayList<int[]> notes, int i) {
-        try {
-            if (i >= notes.size()) {
-                return;
-            }
-            int note = notes.get(i)[0];
-            int velocity = notes.get(i)[1];
-            play(note, (long) velocity);
-            Thread.sleep(velocity * 100);
-            playNotes(notes, i + 1);
-        }
-        catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     /**
@@ -93,8 +58,8 @@ public class musicApp {
             int note = notes.get(i);
             Long velocity = time.get(i);
             System.out.println("PLAY: @" + velocity + " key = " + note);
-            play(note, velocity*3);
-            Thread.sleep(velocity*3);
+            play(note, velocity);
+            Thread.sleep(velocity);
             playNotes(notes, time, i + 1);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();

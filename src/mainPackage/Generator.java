@@ -5,32 +5,32 @@ import javax.sound.midi.ShortMessage;
 import java.util.ArrayList;
 
 public class Generator {
-//    private static ArrayList<int[]> notesToPlay = new ArrayList();
-    private static ArrayList<Integer> prevNotes = new ArrayList();
+    private static ArrayList<Long> prevNotes = new ArrayList();
     private static ArrayList<Long> prevTimes = new ArrayList();
 
     public static void generateSong(int length) {
-        Long prevTime = 0L;
+        System.out.println("---------------time: \n" + Markov.timeTransitionModel);
+        System.out.println("---------------notes: \n" + Markov.notesTransitionModel);
         ArrayList<Integer> notes = new ArrayList<>();
         ArrayList<Long> time = new ArrayList<>();
-        for (MidiEvent event: Markov.ogPrevEvents) {
-            MidiMessage message = event.getMessage();
+        for (midiEventWrapper event: Markov.ogPrevEvents) {
+            MidiMessage message = event.getEvent().getMessage();
             if (message instanceof ShortMessage) {
                 ShortMessage sm = (ShortMessage) message;
                 int key = sm.getData1();
-                long diff = Markov.getTime(prevTimes);
+                long diff = event.getLength();
 
-                prevNotes.add(key);
+                prevNotes.add((long) key);
                 prevTimes.add(diff);
                 notes.add(key);
                 time.add(diff);
             }
         }
         for (int i = 0; i < length; i++) {
-            int newNote = Markov.getNote(prevNotes);
-            Long newTime = Markov.getTime(prevTimes);
+            long newNote = Markov.notesTransitionModel.getPrediction(prevNotes);
+            Long newTime = Markov.timeTransitionModel.getPrediction(prevTimes);
 
-            notes.add(newNote);
+            notes.add((int) newNote);
             time.add(newTime);
             prevNotes.remove(0);
             prevNotes.add(newNote);
