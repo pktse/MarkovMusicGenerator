@@ -16,8 +16,12 @@ public class Markov {
     public static transitionModel notesTransitionModel = new transitionModel();
     public static transitionModel timeTransitionModel = new transitionModel();
 
+    public static ArrayList<Integer> notes = new ArrayList<>();
+    public static ArrayList<Long> time = new ArrayList<>();
+
 
     public static void analyze(Sequence seq) throws Exception {
+
         totalNotes = seq.getTracks().length;
         Sequencer player = MidiSystem.getSequencer();
         player.open();
@@ -26,9 +30,9 @@ public class Markov {
         Track currTrack = seq.getTracks()[0];
         for (int i = 0; i < currTrack.size(); i++){
             // limit size of input
-            if (i == 240){
-                break;
-            }
+//            if (i == 100){
+//                break;
+//            }
             MidiEvent event = currTrack.get(i);
             if (prevEvents.size() < DEPTH) {
                 // still need to first few notes that don't depend on history
@@ -44,12 +48,19 @@ public class Markov {
                 prevEvents.remove(0);
             }
         }
+
+        time.remove(0);
+        notes.remove(notes.size() - 1);
+//        musicApp.playNotes(notes, time, 0);
     }
 
     private static boolean addToMarkov(MidiEvent event) {
         MidiMessage message = event.getMessage();
         if (message instanceof ShortMessage) {
             ShortMessage sm = (ShortMessage) message;
+
+//            System.out.println(sm.getCommand() + " " + sm.getChannel() + " " + sm.getData1() + " " + sm.getData2());
+
             if (sm.getCommand() == NOTE_ON) {
                 int key = sm.getData1();
                 int octave = (key / 12)-1;
@@ -59,9 +70,12 @@ public class Markov {
                 if (velocity != 0) {
                     Long diff = event.getTick() - prevTime;
                     System.out.print("@" + diff + " ");
+
+                    notes.add(key);
+                    time.add(diff);
                     prevTime = event.getTick();
 
-                    if (prevEvents.size() > 1) {
+                    if (prevEvents.size() >= 1) {
                         List<Long> prevNotes = prevEvents.stream().map(
                                 (n) -> (long) ((ShortMessage) n.getEvent().getMessage()).getData1())
                                 .collect(Collectors.toList());

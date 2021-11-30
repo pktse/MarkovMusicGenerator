@@ -12,16 +12,13 @@ public class musicApp {
      * @param args
      * takes in midi file path into args, analyzes input, generates melody from markov model
      * .*/
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         /* 48 is middle C
          * octave is 12 (13?)
          */
         assert args.length > 1;
-        try {
-            process(args);
-        } catch (Exception ex) {
-            System.out.print("failed to parse input: " + ex);
-        }
+        process(args);
+
         Generator.generateSong(100);
         System.out.println("finished generating");
     }
@@ -35,6 +32,9 @@ public class musicApp {
     public static void process(String... args) throws Exception {
         Sequence input = MidiSystem.getSequence(new File(args[0]));
         seqInput = input;
+        System.out.println(seqInput.getDivisionType());
+        System.out.println(seqInput.getResolution());
+        System.out.println(seqInput.getTickLength());
         Sequencer sequencer = MidiSystem.getSequencer();
         sequencer.open();
         sequencer.setSequence(input);
@@ -55,9 +55,16 @@ public class musicApp {
             if (i >= notes.size()) {
                 return;
             }
+            if (i > 50) {
+                return;
+            }
             int note = notes.get(i);
-            Long velocity = time.get(i);
-            System.out.println("PLAY: @" + velocity + " key = " + note);
+
+            int note2 = note % 12;
+            String noteName = Markov.NOTE_NAMES[note2];
+
+            System.out.println("PLAY: @" + time.get(i) + " key = " + note + " note = " + noteName);
+            Long velocity = time.get(i) * 2;
             play(note, velocity);
             Thread.sleep(velocity);
             playNotes(notes, time, i + 1);
@@ -90,15 +97,16 @@ public class musicApp {
             Sequencer player = MidiSystem.getSequencer();
             player.open();
             Sequence seq = new Sequence(seqInput.getDivisionType(), seqInput.getResolution());
+
             Track track = seq.createTrack();
 
             ShortMessage a = new ShortMessage();
-            a.setMessage(144, 1, note, 100);
+            a.setMessage(144, 1, note, 80);
             MidiEvent noteOn = new MidiEvent(a, 0);
             track.add(noteOn);
 
             ShortMessage b = new ShortMessage();
-            b.setMessage(128, 1, note, 100);
+            b.setMessage(144, 1, note, 0);
             MidiEvent noteOff = new MidiEvent(b, velocity);
             track.add(noteOff);
 

@@ -26,6 +26,23 @@ public class Generator {
                 time.add(diff);
             }
         }
+
+//        int j = 0;
+//        while (prevNotes.size() < 3) {
+//            midiEventWrapper event = Markov.ogPrevEvents.get(j);
+//            MidiMessage message = event.getEvent().getMessage();
+//            if (message instanceof ShortMessage) {
+//                ShortMessage sm = (ShortMessage) message;
+//                int key = sm.getData1();
+//                long diff = event.getLength();
+//
+//                prevNotes.add((long) key);
+//                prevTimes.add(diff);
+//                notes.add(key);
+//                time.add(diff);
+//            }
+//            j++;
+//        }
         for (int i = 0; i < length; i++) {
             long newNote = Markov.notesTransitionModel.getPrediction(prevNotes);
             Long newTime = Markov.timeTransitionModel.getPrediction(prevTimes);
@@ -38,6 +55,8 @@ public class Generator {
             prevTimes.add(newTime);
         }
 
+        time.remove(0);
+        notes.remove(notes.size() - 1);
         musicApp.playNotes(notes, time, 0);
     }
 }
